@@ -1,17 +1,17 @@
-var expect = require('chai').expect
-var keyStore = require('../lib/keystore')
-var upgrade = require('../lib/upgrade')
-var signing = require('../lib/signing')
-var fixtures = require('./fixtures/keystore')
-var Transaction = require('ethereumjs-tx')
-var util = require("ethereumjs-util")
-var nacl = require('tweetnacl')
+const expect = require('chai').expect;
+const keyStore = require('../lib/keystore');
+const upgrade = require('../lib/upgrade');
+const signing = require('../lib/signing');
+const fixtures = require('./fixtures/keystore');
+const Transaction = require('ethereumjs-tx');
+const util = require("ethereumjs-util");
+const nacl = require('tweetnacl');
 
 describe("Signing", function () {
   describe("signTx", function() {
     it('signs a transaction deterministically', function(done) {
-      var pw = Uint8Array.from(fixtures.valid[0].pwDerivedKey)
-      var fixture = fixtures.valid[0]
+      const pw = Uint8Array.from(fixtures.valid[0].pwDerivedKey);
+      const fixture = fixtures.valid[0];
       keyStore.createVault({
         password: fixture.password,
         seedPhrase: fixture.mnSeed,
@@ -19,27 +19,27 @@ describe("Signing", function () {
         hdPathString: fixture.hdPathString 
       }, function (err, ks) {
 
-        ks.generateNewAddress(pw)
-        var addr = ks.getAddresses()[0]
-        expect(addr).to.equal(fixtures.valid[0].ethjsTxParams.from)
+        ks.generateNewAddress(pw);
+        const addr = ks.getAddresses()[0];
+        expect(addr).to.equal(fixtures.valid[0].ethjsTxParams.from);
 
-        var tx = new Transaction(fixtures.valid[0].ethjsTxParams)
-        var rawTx = tx.serialize().toString('hex')
-        expect(rawTx).to.equal(fixtures.valid[0].rawUnsignedTx)
+        const tx = new Transaction(fixtures.valid[0].ethjsTxParams);
+        const rawTx = tx.serialize().toString('hex');
+        expect(rawTx).to.equal(fixtures.valid[0].rawUnsignedTx);
 
-        var signedTx0 = signing.signTx(ks, pw, rawTx, addr);
-        expect(signedTx0).to.equal(fixtures.valid[0].rawSignedTx)
+        const signedTx0 = signing.signTx(ks, pw, rawTx, addr);
+        expect(signedTx0).to.equal(fixtures.valid[0].rawSignedTx);
         done();
       })
     });
 
     it('Correctly handles a 31 byte key from bitcore', function(done) {
-      var secretSeed = "erupt consider beyond twist bike enroll you salute weasel emerge divert hundred";
+      const secretSeed = "erupt consider beyond twist bike enroll you salute weasel emerge divert hundred";
 
-      var hdPath = "m/44'/60'/0'" //as defined in SLIP44
-      var password = 'test'
+      const hdPath = "m/44'/60'/0'"; //as defined in SLIP44
+      const password = 'test';
 
-      var fixture = fixtures.valid[0]
+      const fixture = fixtures.valid[0];
       keyStore.createVault({
         password: password,
         seedPhrase: secretSeed,
@@ -51,31 +51,31 @@ describe("Signing", function () {
 
           keystore.generateNewAddress(pwDerivedKey, 1); //Generate a new address
 
-          var address = keystore.getAddresses()[0]
+          const address = keystore.getAddresses()[0];
 
-          var hexSeedETH = keystore.exportPrivateKey(address, pwDerivedKey)
-          var addr0 = keyStore._computeAddressFromPrivKey(hexSeedETH)
-          expect(address).to.equal('0x' + addr0)
+          const hexSeedETH = keystore.exportPrivateKey(address, pwDerivedKey);
+          const addr0 = keyStore._computeAddressFromPrivKey(hexSeedETH);
+          expect(address).to.equal('0x' + addr0);
 
-          var tx = new Transaction({from: address,
+          const tx = new Transaction({from: address,
                                     to: address,
-                                    value: 100000000})
-          var rawTx = tx.serialize().toString('hex');
+                                    value: 100000000});
+          const rawTx = tx.serialize().toString('hex');
 
-          var signedTx = signing.signTx(keystore, pwDerivedKey, rawTx, address, hdPath)
-          var expectedTx = 'f861808080945e2abe3de708923e8425348005ee7fdd77e203cb8405f5e100801ca00a9a2486f65cab6c7819c82ee741f72d1acaab005642eef32f303696909fa64ea04e5d5e0e8d5f38704ac04faa1f91a9ee15a3ffcf158de342324d242b6acba819';
+          const signedTx = signing.signTx(keystore, pwDerivedKey, rawTx, address, hdPath);
+          const expectedTx = 'f861808080945e2abe3de708923e8425348005ee7fdd77e203cb8405f5e100801ca00a9a2486f65cab6c7819c82ee741f72d1acaab005642eef32f303696909fa64ea04e5d5e0e8d5f38704ac04faa1f91a9ee15a3ffcf158de342324d242b6acba819';
 
           expect(signedTx).to.equal(expectedTx);
           done();
         })
       })
-    })
+    });
 
     describe("signMsg", function() {
       it('signs a message deterministically', function(done) {
-        var pw = Uint8Array.from(fixtures.valid[0].pwDerivedKey);
+        const pw = Uint8Array.from(fixtures.valid[0].pwDerivedKey);
 
-        var fixture = fixtures.valid[0]
+        const fixture = fixtures.valid[0];
         keyStore.createVault({
           password: fixture.password,
           seedPhrase: fixture.mnSeed,
@@ -84,27 +84,27 @@ describe("Signing", function () {
         }, function (err, ks) {
 
           ks.generateNewAddress(pw);
-          var addr = ks.getAddresses()[0];
+          const addr = ks.getAddresses()[0];
           expect(addr).to.equal(fixtures.valid[0].ethjsTxParams.from);
 
-          var msg = "this is a message";
+          const msg = "this is a message";
 
-          var signedMsg = signing.signMsg(ks, pw, msg, addr);
+          const signedMsg = signing.signMsg(ks, pw, msg, addr);
 
-          var msgHash = util.addHexPrefix(util.sha3(msg).toString('hex'));
+          const msgHash = util.addHexPrefix(util.sha3(msg).toString('hex'));
 
-          var signedMsgHash = signing.signMsgHash(ks, pw, msgHash, addr);
+          const signedMsgHash = signing.signMsgHash(ks, pw, msgHash, addr);
 
           // signedMsg and signedMsgHash have the same signature
           expect(signedMsg.v).to.equal(signedMsgHash.v);
           expect(signedMsg.r.toString()).to.equal(signedMsgHash.r.toString());
           expect(signedMsg.s.toString()).to.equal(signedMsgHash.s.toString());
 
-          var recoveredAddress = signing.recoverAddress(msg, signedMsg.v, signedMsg.r, signedMsg.s);
+          const recoveredAddress = signing.recoverAddress(msg, signedMsg.v, signedMsg.r, signedMsg.s);
 
           expect(addr).to.equal('0x' + recoveredAddress.toString('hex'));
-          var concatSig = signing.concatSig(signedMsg);
-          var expectedConcatSig = '0x7b518ee144b8facf3f21b1f97a6d1f8aea448934d89cf5570e92bcca4d375ab6080f17400eafad3c5808e064ee56cd45321382040fb299fa028ea3cddf3488151c';
+          const concatSig = signing.concatSig(signedMsg);
+          const expectedConcatSig = '0x7b518ee144b8facf3f21b1f97a6d1f8aea448934d89cf5570e92bcca4d375ab6080f17400eafad3c5808e064ee56cd45321382040fb299fa028ea3cddf3488151c';
 
           expect(concatSig).to.equal(expectedConcatSig);
 

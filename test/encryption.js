@@ -1,8 +1,8 @@
-var expect = require('chai').expect
-var keyStore = require('../lib/keystore')
-var upgrade = require('../lib/upgrade')
-var encryption = require('../lib/encryption')
-var fixtures = require('./fixtures/keystore')
+const expect = require('chai').expect;
+const keyStore = require('../lib/keystore');
+const upgrade = require('../lib/upgrade');
+const encryption = require('../lib/encryption');
+const fixtures = require('./fixtures/keystore');
 
 describe("Encryption", function () {
 
@@ -10,8 +10,8 @@ describe("Encryption", function () {
 
     it('encrypts and decrypts a string', function (done) {
 
-      var fixture = fixtures.valid[0]
-      var pw = Uint8Array.from(fixture.pwDerivedKey)
+      const fixture = fixtures.valid[0];
+      const pw = Uint8Array.from(fixture.pwDerivedKey);
 
       keyStore.createVault({
         password: fixture.password,
@@ -20,15 +20,15 @@ describe("Encryption", function () {
         hdPathString: "m/0'/0'/2'"
       }, function (err, ks) {
 
-        ks.generateNewAddress(pw, 2)
-        var addresses = ks.getAddresses()
-        var pubKey0 = encryption.addressToPublicEncKey(ks, pw, addresses[0])
-        var pubKey1 = encryption.addressToPublicEncKey(ks, pw, addresses[1])
+        ks.generateNewAddress(pw, 2);
+        const addresses = ks.getAddresses();
+        const pubKey0 = encryption.addressToPublicEncKey(ks, pw, addresses[0]);
+        const pubKey1 = encryption.addressToPublicEncKey(ks, pw, addresses[1]);
 
-        var msg = "Hello World!"
-        var encrypted = encryption.asymEncryptString(ks, pw, msg, addresses[0], pubKey1)
-        var cleartext = encryption.asymDecryptString(ks, pw, encrypted, pubKey0, addresses[1])
-        expect(cleartext).to.equal(msg)
+        const msg = "Hello World!";
+        const encrypted = encryption.asymEncryptString(ks, pw, msg, addresses[0], pubKey1);
+        const cleartext = encryption.asymDecryptString(ks, pw, encrypted, pubKey0, addresses[1]);
+        expect(cleartext).to.equal(msg);
         done()
       })
     });
@@ -41,8 +41,8 @@ describe("Encryption", function () {
 
     it('encrypts and decrypts a string to multiple parties', function (done) {
 
-      var fixture = fixtures.valid[0]
-      var pw = Uint8Array.from(fixture.pwDerivedKey)
+      const fixture = fixtures.valid[0];
+      const pw = Uint8Array.from(fixture.pwDerivedKey);
 
       keyStore.createVault({
         password: fixture.password,
@@ -51,16 +51,16 @@ describe("Encryption", function () {
         hdPathString: "m/0'/0'/2'"
       }, function (err, ks) {
 
-        ks.generateNewAddress(pw, 6)
-        var addresses = ks.getAddresses()
-        var pubKeys = []
+        ks.generateNewAddress(pw, 6);
+        const addresses = ks.getAddresses();
+        const pubKeys = [];
         addresses.map(function(addr) {
           pubKeys.push(encryption.addressToPublicEncKey(ks, pw, addr))
-        })
+        });
 
-        var msg = "Hello World to multiple people!";
-        var encrypted = encryption.multiEncryptString(ks, pw, msg, addresses[0], pubKeys.slice(0,4));
-        var cleartext = encryption.multiDecryptString(ks, pw, encrypted, pubKeys[0], addresses[0]);
+        const msg = "Hello World to multiple people!";
+        const encrypted = encryption.multiEncryptString(ks, pw, msg, addresses[0], pubKeys.slice(0,4));
+        let cleartext = encryption.multiDecryptString(ks, pw, encrypted, pubKeys[0], addresses[0]);
         expect(cleartext).to.equal(msg);
         cleartext = encryption.multiDecryptString(ks, pw, encrypted, pubKeys[0], addresses[1]);
         expect(cleartext).to.equal(msg);
@@ -75,4 +75,4 @@ describe("Encryption", function () {
 
     });
   });
-})
+});
